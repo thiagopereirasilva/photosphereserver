@@ -78,14 +78,23 @@ def test():
  """
 
 
-@app.route('/images/calibrate', methods=['GET'])
+@app.route('/images/hdr', methods=['GET'])
 def calibrate():
-    print('[Info]\t\tCalibrating the following images')
-    imagens = procurar_imagens()
-    for img in imagens:
-        print("[Info]\t\t\t"+img)
+    uuid_code = ''
+    if 'phone_UUID' in request.headers:
+            uuid_code = request.headers.get('phone_UUID')
 
-    corrigir_imagens(imagens, 'calibrada')
+    print('[Info]\t\tCalibrating the following images')
+    path = os.getcwd()
+    path = path + '/download/' + uuid_code
+    #if (os.path.isdir(path) == False):
+         #dispara exception  
+
+    imagens = procurar_imagens(path)
+    #for img in imagens:
+     #   print("[Info]\t\t\t"+img)
+
+    corrigir_imagens(imagens, path)
     resp = {'message': 'Ok'
             }
     response_pickled = jsonpickle.encode(resp)
@@ -96,25 +105,31 @@ def calibrate():
 def upload():
     print("Received a request")
     file_name = ''
-    if 'label' in request.headers:
-        file_name = request.headers.get('label')
+    uuid_code = ''
+    #current directory
+    path = os.getcwd()
+    if 'phone_img_name' in request.headers:
+        file_name = request.headers.get('phone_img_name')
+        uuid_code = request.headers.get('phone_UUID')
 
     nparr = np.fromstring(request.data, np.uint8)
     # decode image
     img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
-    print("Saving the image " + file_name)
-
-    # TODO: recuperar nome da imagem
-    cv2.imwrite('./download/'+file_name, img)
+    path = path + '/download/' + uuid_code
+    if (os.path.isdir(path) == False):
+       os.mkdir(path)
+    print("Saving the image " + file_name + " on directory " + path)
+    
+    cv2.imwrite(path +'/'+file_name, img)
     # Visualizar imagem enviada
     #cv2.imshow('URL2Image', img)
     # cv2.waitKey()
 
-    print("Listing directory")
-    arquivos = procurar_imagens("./download")
-    for arquivo in arquivos:
-        print('\t\t- {0}'.format(arquivo))
+    #print("Listing directory")
+    #arquivos = procurar_imagens(path)
+    #for arquivo in arquivos:
+    #    print('\t\t- {0}'.format(arquivo))
 
     # build a response dict to send back to client
     response = {'message': 'image received. size={}x{}'.format(img.shape[1], img.shape[0]),
@@ -126,7 +141,6 @@ def upload():
     response_pickled = jsonpickle.encode(response)
 
     return Response(response=response_pickled, status=200, mimetype="application/json")
-
 
 # start flask app
 app.run(host="0.0.0.0", port=5000)
