@@ -19,7 +19,7 @@ headers = {'content-type': content_type,
 
 image = Image.open(image_name)
 json_data = json.dumps(np.array(image).tolist())
-data = {'image':json_data}
+data = {'image': json_data}
 #print (json.dumps(json_data))
 
 response = requests.post(URL, data=data, headers=headers)

@@ -10,6 +10,7 @@ import os
 import werkzeug
 import jsonpickle
 import cv2
+import base64
 
 
 def procurar_imagens(pasta_fonte='./download'):
@@ -100,28 +101,56 @@ def calibrate():
     response_pickled = jsonpickle.encode(resp)
     return Response(response=response_pickled, status=200, mimetype="application/json")
 
+@app.route('/images/test', methods=['POST'])
+def uploadTest():
+    print("Received a test request")
+    file_name = ''
+    uuid_code = ''
+    img_content = ''
+    if 'phone_img_name' in request.headers:
+        file_name = request.headers.get('phone_img_name')
+    if 'phone_UUID' in request.headers:
+        uuid_code = request.headers.get('phone_UUID')
+    
+    if 'imageContent' in request.data:
+        img_content = request.data
+    print("File name: " + file_name)
+    print("UUID: " + uuid_code)
+    print("Image Content:" + img_content)
+
+    testResponse = {'message':'menino da cabeca grande'}
+    response_pickled = jsonpickle.encode(testResponse)
+
+    return Response(response=response_pickled, status=200, mimetype="application/json")
+
+
 
 @app.route('/images/upload', methods=['POST'])
 def upload():
     print("Received a request")
     file_name = ''
     uuid_code = ''
-    #current directory
+    #get current directory
     path = os.getcwd()
     if 'phone_img_name' in request.headers:
         file_name = request.headers.get('phone_img_name')
         uuid_code = request.headers.get('phone_UUID')
 
-    nparr = np.fromstring(request.data, np.uint8)
+    #nparr = np.fromstring(request.data, np.uint8)
     # decode image
-    img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    array_img = base64.b64decode(request.data)
+
+    #img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
     path = path + '/download/' + uuid_code
     if (os.path.isdir(path) == False):
        os.mkdir(path)
-    print("Saving the image " + file_name + " on directory " + path)
+    print("Saving image <" + file_name + "> belongs to ImageSet <" + uuid_code + "> \n on directory \n" + path)
     
-    cv2.imwrite(path +'/'+file_name, img)
+    #cv2.imwrite(path +'/'+file_name, img)
+    with open(path+'/'+file_name, 'wb') as f_output:
+        f_output.write(array_img)
+
     # Visualizar imagem enviada
     #cv2.imshow('URL2Image', img)
     # cv2.waitKey()
@@ -132,10 +161,11 @@ def upload():
     #    print('\t\t- {0}'.format(arquivo))
 
     # build a response dict to send back to client
-    response = {'message': 'image received. size={}x{}'.format(img.shape[1], img.shape[0]),
-                'size': img.size,
-                'nbytes': img.nbytes,
-                }
+    #response = {'message': 'image received. size={}x{}'.format(img.shape[1], img.shape[0]),
+     #           'size': img.size,
+      #          'nbytes': img.nbytes,
+       #         }
+    response = {'message':'cabeca de tecao'}
     # encode response using jsonpickle
     print("Send response: " + str(response))
     response_pickled = jsonpickle.encode(response)
