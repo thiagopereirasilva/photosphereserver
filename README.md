@@ -5,7 +5,8 @@ Aplicativo de celular que calcula a luminancia de um ambiente.
 
 ## Introdução
 
-
+HDRGEN - Para instalar o hdrgen será necessário a versão 32 bits da biblioteca libstdc++5:i386.
+sudo apt-get install libstdc++5:i386
 
 
 ## Ferramentas
