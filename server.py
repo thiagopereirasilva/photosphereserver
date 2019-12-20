@@ -15,14 +15,32 @@ import cv2
 import base64
 import datetime
 import time
+import json
+
+# Read coniguration file
+ip = ''
+port = ''
+database = ''
+database_collection = ''
+with open('config.json') as json_file:
+    data = json.load(json_file)
+    ip = data['server_ip']
+    port = data['server_port']
+    database = data['database_url']
+    database_collection = data['database_collection']
 
 # Initialize the Flask application
 app = Flask(__name__)
 app.config["CLIENT_IMAGES"] = "/home/thiago/Desktop/Workspace/PhotoSphere/download"
+app.config["HOST"] = "http://10.7.128.18:5000"
+# app.config["HOST"] = "http://" + str(ip) + ":" + str(port)
+
 
 # Initialize Mongo connector
-client = pymongo.MongoClient("mongodb://localhost:27017/")
-db = client["photosphere"]
+# client = pymongo.MongoClient("mongodb://localhost:27017/")
+# db = client["photosphere"]
+client = pymongo.MongoClient(database)
+db = client[database_collection]
 
 
 def procurar_imagens(pasta_fonte='./download'):
@@ -82,6 +100,16 @@ def generate_hdr(uuid_code, calibration):
     print('[Info]\tCalibrating the following images')
     path = os.getcwd()
     path = path + '/download/' + uuid_code
+    # Findding for hdr_image
+    customers = db["imageset"]
+    imageset = customers.find_one(uuid_code)
+    if imageset:
+        print("[Info]\t\tThe imageset " + uuid_code + ' already exist.')
+        if 'hdr_image' in imageset:
+            hdr_path = "download/" + uuid_code + "/" + imageset['hdr_image']
+            return send_file(hdr_path, mimetype="image/gif")
+        else:
+            print("[Info]\t\tGenerating HDR image for imageset " + uuid_code)
 
     imagens = procurar_imagens(path)
     images_path = ''
@@ -91,12 +119,15 @@ def generate_hdr(uuid_code, calibration):
     corrigir_imagens(imagens, path)
 
     print('[Info]\tRunning hdrgen')
-    # call hdrgen
-    # hdr_path = "/download/" + uuid_code + "/" + uuid_code + "_output.jpg"
-    os.popen('./hdrgen/hdrgen -o ' + "/download/" + uuid_code +
-             "/" + uuid_code + "_output.jpg" + " " + images_path)
 
-    return send_file("teste.jpg", mimetype="image/gif")
+    # call hdrgen
+    hdr_path = "download/" + uuid_code + "/" + uuid_code + "_output.jpg"
+    os.popen('./hdrgen/hdrgen -o ' + hdr_path + " " + images_path)
+
+    query = {"_id": uuid_code}
+    value = {"$set": {"hdr_image": uuid_code + "_output.jpg"}}
+    customers.update_one(query, value)
+    return send_file(hdr_path, mimetype="image/gif")
 
 
 @app.route('/images/upload', methods=['POST'])
@@ -146,7 +177,6 @@ def create_imageset():
     images_path = procurar_imagens(path)
     images_path_str = []
     for img in images_path:
-        # images_path_str.append(img)
         arr = img.split("/")
         images_path_str.append(arr[len(arr)-1])
 
@@ -173,15 +203,17 @@ def getAllImageSet():
     all_imageset = []
     customers = db["imageset"]
     for x in customers.find():
-        dd = x['created_date']
-        x['created_date'] = str(dd)
+        aux = x['created_date']
+        x['created_date'] = str(aux)
+        # if 'hdr_image' in x:
+        # aux2 = x['hdr_image']
+        # If not exist hdr_image, then will be created by hdr service
+        x['hdr_image'] = app.config["HOST"] + \
+            "/images/hdr/" + x['_id'] + "/999"
         pathService = []
         for path in x['images_paths']:
-            # print(path)
-            path = "http://10.7.128.18:5000/images/" + x['_id'] + "/" + path
-            # path = url_for('/images/' + x['_id'] + "/" + path)
-            # path = url_for('uploadTest')
-            pathService.append(path)
+            img_url = app.config["HOST"] + "/images/" + x['_id'] + "/" + path
+            pathService.append(img_url)
 
         x['images_paths'] = pathService
 
