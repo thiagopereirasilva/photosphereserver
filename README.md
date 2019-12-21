@@ -1,12 +1,20 @@
 # Parte Servidor do Aplicativo PhotoSphere
 
-Aplicativo de celular que calcula a luminancia de um ambiente.
+Aplicativo de celular que tira 7 fotos com diferentes valores de exposição e calcula a imagem HDR resultante da combinação desta imagens.
+O **front-end** da aplicação é desenvolvido em  Kotlin enquanto a parte **servidor** é desenvolvido em Python.
+
+A parte servidor é responsável por receber e armazenar o conjunto de imagens - denominado imageset - além de gerar a imagem HDR a partir da combinação das imagens no imageset.
+
+## Instalação, Dependências e Uso
+###Parte servidor
+1 - Configurar adequadamente o arquivo de configuração config.json.
+2 - Instalar o software hdrgen. É necessário a versão 32 bits da biblioteca libstdc++5:i386. (sudo apt-get install libstdc++5:i386)
+3 - Instalar o MongoDB e criar collection
+4 - Executar server.py
 
 
-## Introdução
-
-HDRGEN - Para instalar o hdrgen será necessário a versão 32 bits da biblioteca libstdc++5:i386.
-sudo apt-get install libstdc++5:i386
+###Parte Front-end
+Instalar app no celular.
 
 
 ## Ferramentas
@@ -16,6 +24,7 @@ sudo apt-get install libstdc++5:i386
 * [Fotoapparat](https://github.com/RedApparat/Fotoapparat) - Fotoapparat API
 * [camera-app](https://gabrieltanner.org/blog/camera-app) - Use case
 * [Python](https://python.org) - Linguagem para criação da parte servidor
+* [MongoDB](https://mongodb.org) - Banco de Dados que armazena as imagens
 
 
 
