@@ -1,5 +1,5 @@
 {
-    "server_ip": "10.7.128:18",
+    "server_ip": "10.7.128.14",
     "server_port": "5000",
     "database_url": "mongodb://localhost:27017/",
     "database_collection": "photosphere"

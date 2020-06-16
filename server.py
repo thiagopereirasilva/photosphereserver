@@ -32,7 +32,7 @@ with open('config.json') as json_file:
 # Initialize the Flask application
 app = Flask(__name__)
 app.config["CLIENT_IMAGES"] = "/home/thiago/Desktop/Workspace/PhotoSphere/download"
-app.config["HOST"] = "http://10.7.128.18:5000"
+app.config["HOST"] = "http://10.7.128.14:5000"
 # app.config["HOST"] = "http://" + str(ip) + ":" + str(port)
 
 
@@ -122,6 +122,9 @@ def generate_hdr(uuid_code, calibration):
 
     # call hdrgen
     hdr_path = "download/" + uuid_code + "/" + uuid_code + "_output.jpg"
+    
+    print("./hdrgen/hdrgen -o " + hdr_path + " " + images_path)
+    
     os.popen('./hdrgen/hdrgen -o ' + hdr_path + " " + images_path)
 
     query = {"_id": uuid_code}

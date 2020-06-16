@@ -8,8 +8,8 @@ A parte servidor é responsável por receber e armazenar o conjunto de imagens -
 ## Instalação, Dependências e Uso
 ###### Parte servidor
 1 - Configurar adequadamente o arquivo de configuração config.json.
-2 - Instalar o software hdrgen. É necessário a versão 32 bits da biblioteca libstdc++5:i386. (sudo apt-get install libstdc++5:i386)
-3 - Instalar o MongoDB e criar collection
+2 - Instalar o software hdrgen. É necessário a versão 32 bits da biblioteca libstdc++5:i386 (sudo apt-get install libstdc++5:i386) e a biblioteca zlib1g (sudo apt-get install zlib1g:i386)
+3 - Instalar o MongoDB e criar collection (docker run -d -p 27017:27017 -p 28017:28017 mongo)
 4 - Executar server.py
 
 
